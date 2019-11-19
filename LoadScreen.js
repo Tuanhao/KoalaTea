@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import { Text, View, Image, Animated, Easing, StyleSheet } from 'react-native';
 let dgram = require('react-native-udp');
 
+const listeningPort = 3020;
+const sendingPort = 3030; // default 3030
+const sendingHost = 'localhost'; //'172.17.90.177'
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
@@ -74,22 +77,22 @@ class LoadScreen extends Component {
         useNativeDriver: true, 
       })).start();
     socket.once('listening', function() {
-        let buf = toByteArray('{"msgID":2}')
-        socket.send(buf, 0, buf.length, 3030, '127.0.0.1', function(err) {
+        let buf = toByteArray('{"msgId":2}')
+        socket.send(buf, 0, buf.length, sendingPort, sendingHost, function(err) {
             if (err) throw err
             console.log('message was sent')
         })
     })
-    socket.bind(3020)
+    socket.bind(listeningPort)
     socket.on('message', function(msg, rinfo) {
       console.log('message was received', msg)
-      let msgDecoded = String.fromCharCode.apply(null, new Uint8Array(msg));
-      let temp = JSON.parse(msgDecoded);
+      let msgDecoded = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(msg)));
       if (!isEmpty(msgDecoded)) {
         console.log(123, msgDecoded);
+        msgDecoded.socket = socket;
         self.setState({ loading : false})
         const {navigate} = self.props.navigation
-        navigate('Home', {tea: 'abc'})
+        navigate('Home', msgDecoded)
       }
     })
   }

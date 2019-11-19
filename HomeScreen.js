@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, StyleSheet, Picker } from 'react-native';
+import { Text, View, StyleSheet, Picker, Button } from 'react-native';
 import {mockTeaProfile, mockAlarmArray} from './TestConstant.js';
 
 const styles = StyleSheet.create({
@@ -8,56 +8,107 @@ const styles = StyleSheet.create({
       height: '100%',
       backgroundColor: 'lightyellow',
     },
-    titleContainer: {
-      flex: 3,
+    pickerContainer: {
+      flex: 5,
+      flexDirection: 'row'
+    },
+    pickerWrapper: {
+      flex:1,
       alignContent: 'center', 
       justifyContent: 'center',
-      flexDirection:'row'
+      borderWidth: 1,
+      borderColor: 'red',
     },
     picker: {
-
+      height: 50, 
+      width: 100, 
+      flex: 2
+    },
+    pickerHeader: {
+      flex: 2,
+      alignContent: 'center', 
+      justifyContent: 'center',
+    },
+    buttonsContainer: {
+      flex: 1,
+      flexDirection: 'row'
     }
 })
 
 class HomeScreen extends Component {
   state = {
     tea: '',
-    alarm: ''
+    alarm: '',
+    steepTime: 0,
+    temp: 0
   }
   render() {
-    // let teaProfileArray = this.props.navigation.state.params.tea
-    let teaArray = mockTeaProfile.map(function(teaP, i){
+    console.log(this.props.navigation);
+    let teaProfileArray = this.props.navigation.state.params.teas ? this.props.navigation.state.params.teas : mockTeaProfile
+    let teasPickerList = teaProfileArray.map(function(teaP, i){
       return <Picker.Item label={teaP.name} value={teaP.name} key={i} />
     }) 
-    let alarmArray = mockAlarmArray.map(function(alarm, i){
+    let alarmArray = this.props.navigation.state.params.alarms ? this.props.navigation.state.params.alarms : mockAlarmArray
+    let alarmsPickerList = alarmArray.map(function(alarm, i){
       return <Picker.Item label={alarm.name} value={alarm.name} key={i} />
     }) 
     
     return (
       <View style={styles.mainContainer}> 
-        <View style={styles.titleContainer}>
-            <Text>
+        <View style={styles.pickerContainer}>
+          <View style={styles.pickerWrapper}>
+            <Text style={styles.pickerHeader}>
                 TEA
             </Text>
             <Picker
                 selectedValue={this.state.tea}
-                style={{height: 50, width: 100}}
+                style={styles.picker}
                 onValueChange={(itemValue, itemIndex) =>
-                    this.setState({tea: itemValue})}
+                    this.setState({
+                      tea: itemValue,
+                      steepTime: teaProfileArray[itemIndex].steepTime,
+                      temp: teaProfileArray[itemIndex].temp
+                    })}
             >
-                {teaArray}
+                {teasPickerList}
             </Picker>
-            <Text>
+            <Text style={{flex: 2}}>{`
+              Name:${this.state.tea}
+              Steep Time:${this.state.steepTime}
+              Temperature: ${this.state.temp}
+              `}
+            </Text>
+          </View>
+          <View style={styles.pickerWrapper}>
+            <Text style={styles.pickerHeader}>
                 ALARM
             </Text>
             <Picker
                 selectedValue={this.state.alarm}
-                style={{height: 50, width: 100}}
+                style={styles.picker}
                 onValueChange={(itemValue, itemIndex) =>
                     this.setState({alarm: itemValue})}
             >
-                {alarmArray}
+                {alarmsPickerList}
             </Picker>
+            <Text style={{flex: 2}}>{`
+              Name:${this.state.alarm}
+              `}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.buttonsContainer}>
+          <Button
+            title="Add tea"
+            onPress={() => {
+              const {navigate} = this.props.navigation
+              navigate('AddTea', {'teas': teaProfileArray})}
+            }
+          />
+          <Button
+          title="Start"
+          onPress={() => Alert.alert('Simple Button pressed')}
+        />
         </View>
       </View>
     );
