@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import {View, StyleSheet, TextInput, Button, Alert } from 'react-native';
-// import {mockTeaProfile, mockAlarmArray} from './TestConstant.js';
 
 const styles = StyleSheet.create({
     mainContainer: {
@@ -10,24 +9,28 @@ const styles = StyleSheet.create({
     },
 })
 
-class AddTea extends Component {
+export class AddTea extends Component {
   constructor(props) {
     super(props);
     this.state = {
       name: '',
-      steepTime: 0,
-      temp: 0,
+      steepTime: '0',
+      temp: '0',
     };
   }
 
-  validateInputs() {
-    if (this.state.name == '') {
+  validateInputs = (name, steepTime, temp) => {
+    if (name == '') {
       alert('Name can not be empty')
-    } else if (!this.state.name.match(/^[0-9a-z]+$/i)) {
+    } else if (!name.match(/^[\w\s]+$/)) {
       alert('No special character should be used in name')
-    } else if (this.state.steepTime <= 0 || this.state.steepTime > 1800) {
+    } else if (!steepTime.match(/^[0-9]+$/i)) {
+      alert('No special character should be used in steep time')
+    } else if (parseInt(steepTime) <= 0 || parseInt(steepTime) > 1800) {
       alert('Steep time is out of bound')
-    } else if (this.state.temp <= 60 || this.state.temp > 120) {
+    } else if (!temp.match(/^[0-9]+$/i)) {
+      alert('No special character should be used in temperature')
+    } else if (parseInt(temp) <= 60 || parseInt(temp) > 120) {
       alert('Temperature is out of bound')
     } else {
       return true;
@@ -36,8 +39,7 @@ class AddTea extends Component {
   }
 
   onSubmit = () => {
-    console.log('add tea', this.props.navigation);
-    if(this.validateInputs()) {
+    if(this.validateInputs(this.state.name, this.state.steepTime, this.state.temp)) {
       let newTea = {
         name: this.state.name,
         steepTime: this.state.steepTime,
@@ -48,20 +50,20 @@ class AddTea extends Component {
       const {navigate} = this.props.navigation
       navigate('Home', {teas: newTeaProfileArray})
     } else {
-      Alert.alert(
-        'Alert Title',
-        'My Alert Msg',
-        [
-          {text: 'Ask me later', onPress: () => console.log('Ask me later pressed')},
-          {
-            text: 'Cancel',
-            onPress: () => console.log('Cancel Pressed'),
-            style: 'cancel',
-          },
-          {text: 'OK', onPress: () => console.log('OK Pressed')},
-        ],
-        {cancelable: false},
-      );
+      // Alert.alert(
+      //   'Alert Title',
+      //   'My Alert Msg',
+      //   [
+      //     {text: 'Ask me later', onPress: () => console.log('Ask me later pressed')},
+      //     {
+      //       text: 'Cancel',
+      //       onPress: () => console.log('Cancel Pressed'),
+      //       style: 'cancel',
+      //     },
+      //     {text: 'OK', onPress: () => console.log('OK Pressed')},
+      //   ],
+      //   {cancelable: false},
+      // );
     }
   }
 
@@ -79,18 +81,16 @@ class AddTea extends Component {
         <TextInput
           style={styles.textInput}
           placeholder="Steep time"
-          onChangeText={text => this.setState({steepTime: parseInt(text, 10)})}
-          value={`${this.state.steepTime}`}
-          keyboardType="number-pad"
+          onChangeText={text => this.setState({steepTime: text})}
+          value={this.state.steepTime}
           returnKeyType="next"
           maxLength={20}
         />
         <TextInput
           style={styles.textInput}
           placeholder="Temperature"
-          onChangeText={text => this.setState({temp: parseInt(text, 10).toFixed(2)})}
-          value={`${this.state.temp}`}
-          keyboardType="number-pad"
+          onChangeText={text => this.setState({temp: text})}
+          value={this.state.temp}
           returnKeyType="done"
           maxLength={20}
         />
@@ -102,5 +102,3 @@ class AddTea extends Component {
     )
   }
 }
-
-export {AddTea}

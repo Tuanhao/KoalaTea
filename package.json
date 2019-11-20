@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest"
+    "test": "jest --verbose"
   },
   "dependencies": {
     "enzyme": "^3.10.0",
-    "enzyme-adapter-react-15": "^1.4.1",
+    "enzyme-adapter-react-16": "^1.15.1",
     "react": "16.8.3",
     "react-dom": "^16.12.0",
     "react-native": "0.59.4",
@@ -26,6 +26,24 @@
     "react-test-renderer": "16.8.3"
   },
   "jest": {
-    "preset": "react-native"
+    "preset": "react-native",
+    "collectCoverage": true,
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
+    "transform": {
+      "^.+\\.js$": "<rootDir>/node_modules/react-native/jest/preprocessor.js"
+    },
+    "setupFiles": [
+      "<rootDir>/jest/setup.js"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(jest-)?react-native)"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/jest"
+    ]
   }
 }
