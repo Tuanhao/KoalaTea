@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Text, View, StyleSheet, Picker, Button } from 'react-native';
 import {mockTeaProfile, mockAlarmArray} from './TestConstant.js';
+import {send, listen} from './socketUtil.js';
+import {removeTeaMsg} from './msgConstant';
 
 const styles = StyleSheet.create({
     mainContainer: {
@@ -40,13 +42,33 @@ class HomeScreen extends Component {
     tea: '',
     alarm: '',
     steepTime: 0,
-    temp: 0
+    temp: 0,
+    teaId: 0,
+    isCustom: 0,
+    teaProfileArray: mockTeaProfile,
   }
+
+  delete = () => {
+    let tempTeaId = this.state.teaId
+    send(removeTeaMsg(tempTeaId))
+    listen(() => {
+      let filteredTeaProfile = this.state.teaProfileArray.filter((teaProfile) => {
+        return teaProfile.teaId != tempTeaId
+      })
+      this.setState({ teaProfileArray: filteredTeaProfile})
+    })
+  }
+
+  componentDidMount() {
+    if(this.props.navigation.state.params.teas) {
+      this.setState({ teaProfileArray: this.props.navigation.state.params.teas})
+    }
+  }
+
   render() {
-    console.log(this.props.navigation);
-    let teaProfileArray = this.props.navigation.state.params.teas ? this.props.navigation.state.params.teas : mockTeaProfile
+    let teaProfileArray = this.state.teaProfileArray
     let teasPickerList = teaProfileArray.map(function(teaP, i){
-      return <Picker.Item label={teaP.name} value={teaP.name} key={i} />
+      return <Picker.Item label={teaP.name} value={teaP.teaId} key={i} />
     }) 
     let alarmArray = this.props.navigation.state.params.alarms ? this.props.navigation.state.params.alarms : mockAlarmArray
     let alarmsPickerList = alarmArray.map(function(alarm, i){
@@ -61,13 +83,15 @@ class HomeScreen extends Component {
                 TEA
             </Text>
             <Picker
-                selectedValue={this.state.tea}
+                selectedValue={this.state.teaId}
                 style={styles.picker}
                 onValueChange={(itemValue, itemIndex) =>
                     this.setState({
-                      tea: itemValue,
+                      tea: teaProfileArray[itemIndex].name,
                       steepTime: teaProfileArray[itemIndex].steepTime,
-                      temp: teaProfileArray[itemIndex].temp
+                      temp: teaProfileArray[itemIndex].temp,
+                      teaId: itemValue,
+                      isCustom: teaProfileArray[itemIndex].isCustom,
                     })}
             >
                 {teasPickerList}
@@ -78,6 +102,11 @@ class HomeScreen extends Component {
               Temperature: ${this.state.temp}
               `}
             </Text>
+            <Button
+              title="Delete"
+              disabled={!this.state.isCustom}
+              onPress={() => this.delete()}
+            />
           </View>
           <View style={styles.pickerWrapper}>
             <Text style={styles.pickerHeader}>
@@ -106,9 +135,9 @@ class HomeScreen extends Component {
             }
           />
           <Button
-          title="Start"
-          onPress={() => Alert.alert('Simple Button pressed')}
-        />
+            title="Start"
+            onPress={() => Alert.alert('Simple Button pressed')}
+          />
         </View>
       </View>
     );
