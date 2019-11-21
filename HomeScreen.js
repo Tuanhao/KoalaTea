@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Text, View, StyleSheet, Picker, Button } from 'react-native';
 import {mockTeaProfile, mockAlarmArray} from './TestConstant.js';
 import {send, listen} from './socketUtil.js';
-import {removeTeaMsg} from './msgConstant';
+import {removeTeaMsg, startBrewing} from './msgConstant';
 
 const styles = StyleSheet.create({
     mainContainer: {
@@ -40,15 +40,16 @@ const styles = StyleSheet.create({
 class HomeScreen extends Component {
   state = {
     tea: '',
-    alarm: '',
     steepTime: 0,
     temp: 0,
     teaId: 0,
     isCustom: 0,
+    alarm: '',
+    alarmFileLocation: '',
     teaProfileArray: mockTeaProfile,
   }
 
-  delete = () => {
+  delete() {
     let tempTeaId = this.state.teaId
     send(removeTeaMsg(tempTeaId))
     listen(() => {
@@ -56,6 +57,26 @@ class HomeScreen extends Component {
         return teaProfile.teaId != tempTeaId
       })
       this.setState({ teaProfileArray: filteredTeaProfile})
+    })
+  }
+  
+  addTea(teaProfileArray) {
+    console.log("add tea pressed");
+    const {navigate} = this.props.navigation
+    navigate('AddTea', {'teas': teaProfileArray})
+  }
+
+  start() {
+    send(startBrewing(
+      this.state.tea,
+      this.state.steepTime,
+      this.state.temp,
+      this.state.alarm,
+      this.state.alarmFileLocation
+    ))
+    listen(() => {
+      const {navigate} = this.props.navigation
+      navigate('Load', {'isBrewing': true})
     })
   }
 
@@ -116,7 +137,10 @@ class HomeScreen extends Component {
                 selectedValue={this.state.alarm}
                 style={styles.picker}
                 onValueChange={(itemValue, itemIndex) =>
-                    this.setState({alarm: itemValue})}
+                    this.setState({
+                      alarm: itemValue,
+                      alarmFileLocation: alarmArray[itemIndex].fileLocation
+                    })}
             >
                 {alarmsPickerList}
             </Picker>
@@ -129,14 +153,11 @@ class HomeScreen extends Component {
         <View style={styles.buttonsContainer}>
           <Button
             title="Add tea"
-            onPress={() => {
-              const {navigate} = this.props.navigation
-              navigate('AddTea', {'teas': teaProfileArray})}
-            }
+            onPress={() => this.addTea(teaProfileArray)}
           />
           <Button
             title="Start"
-            onPress={() => Alert.alert('Simple Button pressed')}
+            onPress={() => this.start()}
           />
         </View>
       </View>

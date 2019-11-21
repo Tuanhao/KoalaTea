@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1574281562619" clover="3.2.0">
-  <project timestamp="1574281562620" name="All files">
-    <metrics statements="66" coveredstatements="36" conditionals="26" coveredconditionals="17" methods="17" coveredmethods="5" elements="109" coveredelements="58" complexity="0" loc="66" ncloc="66" packages="1" files="2" classes="2"/>
+<coverage generated="1574365989032" clover="3.2.0">
+  <project timestamp="1574365989033" name="All files">
+    <metrics statements="68" coveredstatements="36" conditionals="26" coveredconditionals="17" methods="17" coveredmethods="5" elements="111" coveredelements="58" complexity="0" loc="68" ncloc="68" packages="1" files="2" classes="2"/>
     <file name="AddTea.js" path="/Users/mac/School/KoalaTea/AddTea.js">
       <metrics statements="39" coveredstatements="32" conditionals="18" coveredconditionals="17" methods="10" coveredmethods="5"/>
       <line num="1" count="1" type="stmt"/>
@@ -45,7 +45,7 @@
       <line num="121" count="1" type="stmt"/>
     </file>
     <file name="socketUtil.js" path="/Users/mac/School/KoalaTea/socketUtil.js">
-      <metrics statements="27" coveredstatements="4" conditionals="8" coveredconditionals="0" methods="7" coveredmethods="0"/>
+      <metrics statements="29" coveredstatements="4" conditionals="8" coveredconditionals="0" methods="7" coveredmethods="0"/>
       <line num="1" count="1" type="stmt"/>
       <line num="4" count="1" type="stmt"/>
       <line num="5" count="1" type="stmt"/>
@@ -62,17 +62,19 @@
       <line num="27" count="0" type="stmt"/>
       <line num="31" count="0" type="stmt"/>
       <line num="32" count="0" type="stmt"/>
-      <line num="33" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="33" count="0" type="stmt"/>
       <line num="34" count="0" type="stmt"/>
-      <line num="39" count="0" type="stmt"/>
-      <line num="40" count="0" type="stmt"/>
+      <line num="35" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="36" count="0" type="stmt"/>
       <line num="41" count="0" type="stmt"/>
       <line num="42" count="0" type="stmt"/>
-      <line num="43" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="43" count="0" type="stmt"/>
       <line num="44" count="0" type="stmt"/>
       <line num="45" count="0" type="cond" truecount="0" falsecount="2"/>
       <line num="46" count="0" type="stmt"/>
+      <line num="47" count="0" type="cond" truecount="0" falsecount="2"/>
       <line num="48" count="0" type="stmt"/>
+      <line num="50" count="0" type="stmt"/>
     </file>
   </project>
 </coverage>
