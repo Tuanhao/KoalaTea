@@ -39,14 +39,15 @@ const styles = StyleSheet.create({
 
 class HomeScreen extends Component {
   state = {
-    tea: '',
-    steepTime: 0,
-    temp: 0,
-    teaId: 0,
-    isCustom: 0,
-    alarm: '',
-    alarmFileLocation: '',
+    tea: mockTeaProfile[0].name,
+    steepTime: mockTeaProfile[0].steepTime,
+    temp: mockTeaProfile[0].temp,
+    teaId: mockTeaProfile[0].teaId,
+    isCustom: mockTeaProfile[0].isCustom,
+    alarm: mockAlarmArray[0].name,
+    alarmFileLocation: mockAlarmArray[0].fileLocation,
     teaProfileArray: mockTeaProfile,
+    alarmArray: mockAlarmArray,
   }
 
   delete() {
@@ -61,7 +62,6 @@ class HomeScreen extends Component {
   }
   
   addTea(teaProfileArray) {
-    console.log("add tea pressed");
     const {navigate} = this.props.navigation
     navigate('AddTea', {'teas': teaProfileArray})
   }
@@ -74,15 +74,25 @@ class HomeScreen extends Component {
       this.state.alarm,
       this.state.alarmFileLocation
     ))
-    listen(() => {
-      const {navigate} = this.props.navigation
-      navigate('Load', {'isBrewing': true})
-    })
+    const {navigate} = this.props.navigation
+    navigate('Load', {'isBrewing': true})
   }
 
   componentDidMount() {
     if(this.props.navigation.state.params.teas) {
-      this.setState({ teaProfileArray: this.props.navigation.state.params.teas})
+      let fetchedTeas = this.props.navigation.state.params.teas
+      let fetchedAlarms = this.props.navigation.state.params.alarms
+      this.setState({
+        tea: fetchedTeas[0].name,
+        steepTime: fetchedTeas[0].steepTime,
+        temp: fetchedTeas[0].temp,
+        teaId: fetchedTeas[0].teaId,
+        isCustom: fetchedTeas[0].isCustom,
+        alarm: fetchedAlarms[0].name,
+        alarmFileLocation: fetchedAlarms[0].fileLocation,
+        teaProfileArray: fetchedTeas,
+        alarmArray: fetchedAlarms
+      })
     }
   }
 
@@ -91,10 +101,10 @@ class HomeScreen extends Component {
     let teasPickerList = teaProfileArray.map(function(teaP, i){
       return <Picker.Item label={teaP.name} value={teaP.teaId} key={i} />
     }) 
-    let alarmArray = this.props.navigation.state.params.alarms ? this.props.navigation.state.params.alarms : mockAlarmArray
+    let alarmArray =  this.state.alarmArray
     let alarmsPickerList = alarmArray.map(function(alarm, i){
       return <Picker.Item label={alarm.name} value={alarm.name} key={i} />
-    }) 
+    })
     
     return (
       <View style={styles.mainContainer}> 
@@ -106,14 +116,15 @@ class HomeScreen extends Component {
             <Picker
                 selectedValue={this.state.teaId}
                 style={styles.picker}
-                onValueChange={(itemValue, itemIndex) =>
-                    this.setState({
-                      tea: teaProfileArray[itemIndex].name,
-                      steepTime: teaProfileArray[itemIndex].steepTime,
-                      temp: teaProfileArray[itemIndex].temp,
-                      teaId: itemValue,
-                      isCustom: teaProfileArray[itemIndex].isCustom,
-                    })}
+                onValueChange={(itemValue, itemIndex) => {
+                  this.setState({
+                    tea: teaProfileArray[itemIndex].name,
+                    steepTime: teaProfileArray[itemIndex].steepTime,
+                    temp: teaProfileArray[itemIndex].temp,
+                    teaId: itemValue,
+                    isCustom: teaProfileArray[itemIndex].isCustom,
+                  })
+                }}
             >
                 {teasPickerList}
             </Picker>

@@ -65,18 +65,20 @@ export class AddTea extends Component {
       let newTea = {
         name: this.state.name,
         steepTime: parseInt(this.state.steepTime),
-        temp: parseInt(this.state.temp)
+        temp: parseInt(this.state.temp),
+        isCustom: 1,
       }
       let newTeaProfileArray = this.props.navigation.state.params.teas
-      newTeaProfileArray.push(newTea)
       let data = {
         "msgId": 9,
         "tea": newTea,
       }
       send(data);
-      listen(() => {
+      listen((msg) => {
+        newTea.teaId = msg.teaId
+        newTeaProfileArray.push(newTea)
         const {navigate} = this.props.navigation
-        navigate('Home', {teas: newTeaProfileArray})
+        navigate('Home', {newTeaProfileArray})
       })
     }
   }

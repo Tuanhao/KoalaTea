@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { Text, View, Image, Animated, Easing, StyleSheet, Button } from 'react-native';
-import {createSocket, send, listen} from './socketUtil.js'
+import { Text, View, Image, Animated, Easing, StyleSheet, Button, Alert, Modal, ActivityIndicator } from 'react-native';
+import {createSocket, send, listen, sendCancellingRequest} from './socketUtil.js'
+import {acknowledgeMsg, getPreset} from './msgConstant';
 
 const styles = StyleSheet.create({
   mainContainer: {
@@ -44,8 +45,14 @@ class LoadScreen extends Component {
     super(props)
     this.state = { 
       spinValue: new Animated.Value(0),
-      loading: true,
+      isCancelling: false,
     }
+  }
+
+  cancel = () => {
+    this.setState({isCancelling: true})
+    sendCancellingRequest()
+    //TODO: listen ????
   }
   
 
@@ -58,20 +65,35 @@ class LoadScreen extends Component {
         easing: Easing.linear, 
         useNativeDriver: true, 
       })).start();
+    createSocket()
+    send(getPreset())
+    listen((msgDecoded) => {
+      const {replace} = self.props.navigation
+      replace('Home', msgDecoded)
+    })
+  }
+
+  componentDidUpdate() {
     if (this.props.navigation.state.params.isBrewing) {
       listen(() => {
-        console.log('brewingggg');
-      })
-    } else {
-      createSocket()
-      send({"msgId":2})
-      listen((msgDecoded) => {
-        self.setState({ loading : false})
-        const {navigate} = self.props.navigation
-        navigate('Home', msgDecoded)
+        Alert.alert(
+          'Brewing Finished',
+          'Your tea is ready! Tea is best served when it is hot',
+          [
+            {text: 'Brew another tea', onPress: () => {
+              send(acknowledgeMsg())
+              send({"msgId":2})
+              listen((msgDecoded) => {
+                this.props.navigation.replace('Home', msgDecoded)
+              })
+            }},
+            {text: 'OK!', onPress: () => {
+              send(acknowledgeMsg())
+            }},
+          ]
+        );
       })
     }
-    
   }
 
   render() {
@@ -83,7 +105,7 @@ class LoadScreen extends Component {
     let cancelButton;
     if (this.props.navigation.state.params.isBrewing) {
       titleText = <Text style={styles.titleText}>Brewing</Text>;
-      cancelButton = <Button title="Cancel" />
+      cancelButton = <Button title="Cancel" onPress={this.cancel}/>
     } else {
       titleText = 
       <Text style={styles.titleText}>
@@ -112,6 +134,17 @@ class LoadScreen extends Component {
           <Image style={styles.koalaImg} source={require('./assets/koala.png')}></Image>
         </View>
         {cancelButton}
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={this.state.isCancelling}>
+          <View style={styles.mainContainer}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.titleText}>CANCELLING...</Text>
+              <ActivityIndicator size="large" color="#00ff00" />
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   }

@@ -19,3 +19,15 @@ export let startBrewing = (teaName, steepTime, temp, alarmName, fileLocation) =>
     }
   }
 }
+
+export let getPreset = () => {
+  return {
+    "msgId": 2,
+  }
+}
+
+export let acknowledgeMsg = () => {
+  return {
+    "msgId": 8,
+  }
+}
