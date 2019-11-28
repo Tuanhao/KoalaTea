@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {View, StyleSheet, TextInput, Button, Text } from 'react-native';
-import {send, listen} from './socketUtil.js';
+import {sendAndWaitWithTimeout} from './socketUtil.js';
 
 const styles = StyleSheet.create({
     mainContainer: {
@@ -73,13 +73,12 @@ export class AddTea extends Component {
         "msgId": 9,
         "tea": newTea,
       }
-      send(data);
-      listen((msg) => {
+      sendAndWaitWithTimeout(data, (msg) => {
         newTea.teaId = msg.teaId
         newTeaProfileArray.push(newTea)
         const {navigate} = this.props.navigation
         navigate('Home', {newTeaProfileArray})
-      })
+      }, 9)
     }
   }
 

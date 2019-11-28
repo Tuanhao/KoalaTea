@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Text, View, Image, Animated, Easing, StyleSheet, Button, Alert, Modal, ActivityIndicator } from 'react-native';
-import {createSocket, send, listen, sendCancellingRequest} from './socketUtil.js'
+import { Text, View, Image, Animated, Easing, StyleSheet, Button, Alert, ActivityIndicator } from 'react-native';
+import {createSocket, send, listen, sendCancellingRequest, sendAndWaitWithTimeout} from './socketUtil.js'
 import {acknowledgeMsg, getPreset} from './msgConstant';
 
 const styles = StyleSheet.create({
@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'lightyellow',
   },
   titleContainer: {
-    flex: 3,
+    flex: 1,
     alignContent: 'center', 
     justifyContent: 'center'
   },
@@ -24,19 +24,36 @@ const styles = StyleSheet.create({
     color: 'lightgreen'
   },
   loaderContainer: {
-    flex: 2, 
-    alignContent: 'center', 
-    justifyContent: 'center'
-  },
-  koalaContainer: {
     flex: 4, 
     alignContent: 'center', 
-    justifyContent: 'center'
+    justifyContent: 'center',
+    flexDirection: 'row'
   },
-  koalaImg: {
-    alignSelf: 'center', 
-    width: 200, 
-    height: 200
+  leaf: {
+    alignSelf: 'center',
+    width: 550,
+    height: 550,
+    resizeMode: 'contain',
+    zIndex: 2,
+    position: "absolute",
+  },
+  // koalaContainer: {
+  //   flex: 4, 
+  //   alignContent: 'center', 
+  //   justifyContent: 'center'
+  // },
+  // koalaImg: {
+  //   alignSelf: 'center', 
+  //   width: 200, 
+  //   height: 200
+  // },
+  
+  cancelModal: {
+    height: '100%',
+    position: "absolute",
+    backgroundColor: 'lightyellow',
+    top: 0,
+    left: 30
   }
 })
 
@@ -44,68 +61,115 @@ class LoadScreen extends Component {
   constructor(props) {
     super(props)
     this.state = { 
-      spinValue: new Animated.Value(0),
+      koala: new Animated.Value(0),
+      koalaa: new Animated.Value(0),
+      koalaaa: new Animated.Value(0),
       isCancelling: false,
     }
   }
 
-  cancel = () => {
+  cancel() {
     this.setState({isCancelling: true})
     sendCancellingRequest()
-    //TODO: listen ????
+    listen(() => {
+      this.setState({isCancelling: false})
+      this.props.navigation.replace('Home', this.props.navigation.state.params.teas)
+    }, 13)
   }
   
 
   componentDidMount() {
     let self = this;
-    Animated.loop(Animated.timing(
-      this.state.spinValue, { 
+    Animated.loop(Animated.sequence([
+      Animated.timing(
+      this.state.koala, { 
         toValue: 1, 
-        duration: 5000, 
+        duration: 10, 
         easing: Easing.linear, 
         useNativeDriver: true, 
-      })).start();
+      }),
+      Animated.delay(1000),
+      Animated.timing(
+        this.state.koalaa, { 
+          toValue: 1, 
+          duration: 10, 
+          easing: Easing.linear, 
+          useNativeDriver: true, 
+        }),
+      Animated.delay(1000),
+      Animated.timing(
+        this.state.koalaaa, { 
+          toValue: 1, 
+          duration: 10, 
+          easing: Easing.linear, 
+          useNativeDriver: true, 
+        }),
+        Animated.delay(1000),
+        Animated.parallel([
+          Animated.timing(
+            this.state.koala, { 
+              toValue: 0, 
+              duration: 10, 
+              easing: Easing.linear, 
+              useNativeDriver: true, 
+          }),
+          Animated.timing(
+            this.state.koalaa, { 
+              toValue: 0, 
+              duration: 10, 
+              easing: Easing.linear, 
+              useNativeDriver: true, 
+          }),
+          Animated.timing(
+            this.state.koalaaa, { 
+              toValue: 0, 
+              duration: 10, 
+              easing: Easing.linear, 
+              useNativeDriver: true, 
+          }),
+          Animated.delay(1000),
+        ]),
+    ])).start();
     createSocket()
-    send(getPreset())
-    listen((msgDecoded) => {
-      const {replace} = self.props.navigation
-      replace('Home', msgDecoded)
-    })
-  }
-
-  componentDidUpdate() {
     if (this.props.navigation.state.params.isBrewing) {
       listen(() => {
-        Alert.alert(
-          'Brewing Finished',
-          'Your tea is ready! Tea is best served when it is hot',
-          [
-            {text: 'Brew another tea', onPress: () => {
-              send(acknowledgeMsg())
-              send({"msgId":2})
-              listen((msgDecoded) => {
-                this.props.navigation.replace('Home', msgDecoded)
-              })
-            }},
-            {text: 'OK!', onPress: () => {
-              send(acknowledgeMsg())
-            }},
-          ]
-        );
-      })
+         if (!this.state.isCancelling) {
+          Alert.alert(
+            'Brewing Finished',
+            'Your tea is ready! Tea is best served while it is hot',
+            [
+              {text: 'Brew another tea', onPress: () => {
+                send(acknowledgeMsg())
+                this.props.navigation.replace('Home', this.props.navigation.state.params.teas)
+              }},
+              {text: 'Dismiss', onPress: () => {
+                send(acknowledgeMsg())
+              }},
+            ]
+          )
+        };
+      }, 4)
+    } else {
+      sendAndWaitWithTimeout(getPreset(), (msgDecoded) => {
+        const {replace} = self.props.navigation
+        replace('Home', msgDecoded)
+      }, 2)
     }
   }
 
   render() {
-    const spin = this.state.spinValue.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['0deg', '360deg']
-    })
     let titleText;
     let cancelButton;
+    let cancelModal = this.state.isCancelling ? 
+    <View style={styles.cancelModal}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.titleText}>CANCELLING...</Text>
+        <ActivityIndicator size="large" color="#00ff00" />
+      </View>
+    </View> : null
     if (this.props.navigation.state.params.isBrewing) {
       titleText = <Text style={styles.titleText}>Brewing</Text>;
-      cancelButton = <Button title="Cancel" onPress={this.cancel}/>
+      cancelButton = <Button title="Cancel" onPress={() => this.cancel()}/>
     } else {
       titleText = 
       <Text style={styles.titleText}>
@@ -124,27 +188,21 @@ class LoadScreen extends Component {
       <View style={styles.mainContainer}>
         <View style={styles.titleContainer}>
           {titleText}
+          {cancelButton}
         </View>
         <View style={styles.loaderContainer}>
+        <Image style={styles.leaf} source={require('./assets/leaf.png')}></Image>
         <Animated.Image
-          style={{width: 150, alignSelf: 'center', height: 150, resizeMode: 'contain', transform: [{rotate: spin}] }}
-          source={require('./assets/leaf.png')} />
+          style={{width: 80, margin: 5, alignSelf: 'center', resizeMode: 'contain', opacity: this.state.koala }}
+          source={require('./assets/koalaHead.png')} />
+        <Animated.Image
+          style={{width: 80, margin: 5, alignSelf: 'center', resizeMode: 'contain', opacity: this.state.koalaa }}
+          source={require('./assets/koalaHead.png')} />
+        <Animated.Image
+          style={{width: 80, margin: 5, alignSelf: 'center', resizeMode: 'contain', opacity: this.state.koalaaa }}
+          source={require('./assets/koalaHead.png')} />
         </View>
-        <View style={styles.koalaContainer}>
-          <Image style={styles.koalaImg} source={require('./assets/koala.png')}></Image>
-        </View>
-        {cancelButton}
-        <Modal
-          animationType="slide"
-          transparent={false}
-          visible={this.state.isCancelling}>
-          <View style={styles.mainContainer}>
-            <View style={styles.titleContainer}>
-              <Text style={styles.titleText}>CANCELLING...</Text>
-              <ActivityIndicator size="large" color="#00ff00" />
-            </View>
-          </View>
-        </Modal>
+        {cancelModal}
       </View>
     );
   }

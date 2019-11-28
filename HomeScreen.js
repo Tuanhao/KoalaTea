@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Text, View, StyleSheet, Picker, Button } from 'react-native';
 import {mockTeaProfile, mockAlarmArray} from './TestConstant.js';
-import {send, listen} from './socketUtil.js';
+import {send, listen, sendAndWaitWithTimeout} from './socketUtil.js';
 import {removeTeaMsg, startBrewing} from './msgConstant';
 
 const styles = StyleSheet.create({
@@ -52,13 +52,12 @@ class HomeScreen extends Component {
 
   delete() {
     let tempTeaId = this.state.teaId
-    send(removeTeaMsg(tempTeaId))
-    listen(() => {
+    sendAndWaitWithTimeout(removeTeaMsg(tempTeaId), () => {
       let filteredTeaProfile = this.state.teaProfileArray.filter((teaProfile) => {
         return teaProfile.teaId != tempTeaId
       })
       this.setState({ teaProfileArray: filteredTeaProfile})
-    })
+    }, 10)
   }
   
   addTea(teaProfileArray) {
@@ -67,15 +66,16 @@ class HomeScreen extends Component {
   }
 
   start() {
-    send(startBrewing(
+    sendAndWaitWithTimeout(startBrewing(
       this.state.tea,
       this.state.steepTime,
       this.state.temp,
       this.state.alarm,
       this.state.alarmFileLocation
-    ))
-    const {navigate} = this.props.navigation
-    navigate('Load', {'isBrewing': true})
+    ), () => {
+      const {replace} = this.props.navigation
+      replace('Load', {'isBrewing': true, 'teas': this.state.teaProfileArray})
+    }, 40)
   }
 
   componentDidMount() {
