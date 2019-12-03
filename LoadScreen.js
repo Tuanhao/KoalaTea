@@ -37,23 +37,13 @@ const styles = StyleSheet.create({
     zIndex: 2,
     position: "absolute",
   },
-  // koalaContainer: {
-  //   flex: 4, 
-  //   alignContent: 'center', 
-  //   justifyContent: 'center'
-  // },
-  // koalaImg: {
-  //   alignSelf: 'center', 
-  //   width: 200, 
-  //   height: 200
-  // },
-  
   cancelModal: {
     height: '100%',
+    width: '100%',
     position: "absolute",
     backgroundColor: 'lightyellow',
     top: 0,
-    left: 30
+    left: 0,
   }
 })
 
@@ -73,7 +63,10 @@ class LoadScreen extends Component {
     sendCancellingRequest()
     listen(() => {
       this.setState({isCancelling: false})
-      this.props.navigation.replace('Home', this.props.navigation.state.params.teas)
+      sendAndWaitWithTimeout(getPreset(), (msgDecoded) => {
+        const {replace} = this.props.navigation
+        replace('Home', msgDecoded)
+      }, 2)
     }, 13)
   }
   
@@ -140,7 +133,10 @@ class LoadScreen extends Component {
             [
               {text: 'Brew another tea', onPress: () => {
                 send(acknowledgeMsg())
-                this.props.navigation.replace('Home', this.props.navigation.state.params.teas)
+                sendAndWaitWithTimeout(getPreset(), (msgDecoded) => {
+                  const {replace} = this.props.navigation
+                  replace('Home', msgDecoded)
+                }, 2)
               }},
               {text: 'Dismiss', onPress: () => {
                 send(acknowledgeMsg())

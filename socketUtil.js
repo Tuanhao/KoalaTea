@@ -5,7 +5,7 @@ let socket;
 let isReceived = false;
 const listeningPort = 3020;
 const sendingPort = 1080; // default 3030
-const cancellingPort = 1075
+const cancellingPort = 1075;
 const sendingHost = '192.168.43.248';
 
 function toByteArray(obj) {
@@ -28,7 +28,7 @@ function isEmpty(obj) {
 export function createSocket() {
   if (!socket) {
     socket = dgram.createSocket('udp4')
-    socket.bind({port: listeningPort, address: '192.168.0.15'})
+    socket.bind(listeningPort)
   }
 }
 
@@ -83,8 +83,8 @@ export function sendAndWaitWithTimeout(msg, callBackFn, expectedMsgId) {
     if (!isReceived) {
       send(msg)
       setTimeout(() => {
-        // if (!isReceived) alert('Error: Controller Pi is not responding')
-      }, 2000)
+        if (!isReceived) alert('Error: Controller Pi is not responding')
+      }, 5000)
     }
-  }, 8000)
+  }, 13000)
 }
