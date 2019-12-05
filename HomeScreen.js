@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
       borderWidth: 3,
       borderColor: 'green',
       borderRadius: 10,
-      backgroundColor:'rgba(255,255,255,0.3)',
+      backgroundColor:'rgba(255,255,255,0.5)',
     },
     pickerHeader: {
       position:'absolute',
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
       color: 'green',
     },
     picker: {
-      marginTop: 100,
+      marginTop: 150,
       height: 150, 
       width: '100%', 
       alignContent: 'center', 
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
       bottom: 0,
       height: 120, 
       width: '100%',
-      fontSize: 15,
+      fontSize: 18,
       textAlign: 'left',
     },
     InfoBox_zebra: {
@@ -152,6 +152,7 @@ class HomeScreen extends Component {
                 TEA
             </Text>
             <Picker
+                itemStyle={{fontSize: 30}}
                 selectedValue={this.state.teaId}
                 style={styles.picker}
                 onValueChange={(itemValue, itemIndex) => {
@@ -173,7 +174,7 @@ class HomeScreen extends Component {
               </Text>
               Steep Time:
               <Text style={styles.InfoBox_zebra}>
-              {`${this.state.steepTime}`}ms{"\n"}
+              {`${this.state.steepTime}`}s{"\n"}
               </Text>
               Temperature:
               <Text style={styles.InfoBox_zebra}>
@@ -193,6 +194,7 @@ class HomeScreen extends Component {
                 ALARM
             </Text>
             <Picker
+                itemStyle={{fontSize: 30}}
                 selectedValue={this.state.alarm}
                 style={styles.picker}
                 onValueChange={(itemValue, itemIndex) =>
